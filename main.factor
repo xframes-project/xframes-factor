@@ -1,6 +1,6 @@
 USING: alien alien.c-types alien.libraries
 alien.libraries.finder alien.syntax calendar io
-io.encodings.ascii kernel opengl.gl.extensions system threads ;
+io.encodings.ascii kernel opengl.gl.extensions system threads concurrency.mailboxes ;
 IN: app
 
 LIBRARY: xframesshared
@@ -18,12 +18,18 @@ os linux? [
 
 CALLBACK: void OnInitCb ( )
 FUNCTION: void init ( c-string baseAssetsPath, c-string fontDefs, c-string themeDef, OnInitCb onInit )
+FUNCTION: void setElement ( c-string elementJson )
+FUNCTION: void setChildren ( int id, c-string childrenIdJson )
+
+: after-init ( -- )
+    "{\"type\": \"node\", \"id\": 0, \"root\": true}" setElement
+    "{\"type\": \"unformatted-text\", \"id\": 1, \"text\": \"Hello, world\"}" setElement
+
+    0 "[1]" setChildren ;
 
 : on-init ( -- callback )
-    ! "Hello" print
-
     void {  } cdecl [
-        ! "Hello" print
+        [ after-init ] in-thread
     ] alien-callback ;
 
 
@@ -36,7 +42,7 @@ FUNCTION: void init ( c-string baseAssetsPath, c-string fontDefs, c-string theme
 
 : launch ( -- )
     [
-        "./assets" "{}" "{}" on-init init
+        "./assets" "{\"defs\": [{\"name\": \"roboto-regular\", \"size\": 16}]}" "{}" on-init init
     ] in-thread ;
 
 
