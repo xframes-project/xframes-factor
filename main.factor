@@ -1,6 +1,6 @@
-USING: io alien alien.c-types alien.libraries
-alien.libraries.finder alien.syntax io io.encodings.ascii kernel
-opengl.gl.extensions system threads ;
+USING: alien alien.c-types alien.libraries
+alien.libraries.finder alien.syntax calendar io
+io.encodings.ascii kernel opengl.gl.extensions system threads ;
 IN: app
 
 LIBRARY: xframesshared
@@ -20,8 +20,10 @@ CALLBACK: void OnInitCb ( )
 FUNCTION: void init ( c-string baseAssetsPath, c-string fontDefs, c-string themeDef, OnInitCb onInit )
 
 : on-init ( -- callback )
+    ! "Hello" print
+
     void {  } cdecl [
-        "Hello" print
+        ! "Hello" print
     ] alien-callback ;
 
 
@@ -30,10 +32,12 @@ FUNCTION: void init ( c-string baseAssetsPath, c-string fontDefs, c-string theme
     t ; 
 
 : wait-loop ( -- )
-    [ ui-wait ] [ "Waiting..." print ] while ;
+    [ ui-wait ] [  ] while ;
 
 : launch ( -- )
-    "./assets" "{}" "{}" on-init init ;
+    [
+        "./assets" "{}" "{}" on-init init
+    ] in-thread ;
 
 
 : app ( -- ) 
